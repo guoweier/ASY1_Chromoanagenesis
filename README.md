@@ -1,2 +1,6 @@
-# ASY1_Chromoanagenesis
-Identification of novel DNA junctions in Arabidopsis asy1 mutational progeny, using the NDJ_Identification workflow. 
+# ASY1_Manuscript
+Analysis data for asy1 chromoanagenesis manuscript.
+
+## Data ##
+1. Candidate novel DNA junctions identification
+2. Enrichment ratio for gene contents
