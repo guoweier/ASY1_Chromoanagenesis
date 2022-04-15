@@ -1,0 +1,218 @@
+---
+title: "Arabidopsis_enrich_gene_visualization"
+output:
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction #
+This is a Notebook for enrichment ratio results visualization. 
+The output from a [custom python script](https://github.com/guoweier/Poplar_Chromoanagenesis/blob/master/enrichment-ratio/enrichment-window-ratio.py) shows: 
+1. Target genomic feature density surround real breakpoints;
+2. Target genomic feature density surround 10,000 (default number) pseudo breakpoints, with 1,000 (default number) random selective pseudo population;
+3. One t-test results displaying the p-value with each pseudo population and the real breakpoints group.
+
+This R script is aimed to visualize these data into density plot, by using ggplot package. 
+
+# Outline #
+1. Input dataset and libraries
+2. 
+
+# Input libraries and dataset #
+## input library ##
+```{r}
+library(ggplot2)
+library("ggpubr")
+```
+
+## input 1kb window dataset ##
+### input psuedo dataset ###
+```{r}
+DHS.rand.1k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_DHS-Stats-20220414.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+gene.rand.1k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_gene-Stats-20220414.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+```
+
+### adjust parameters in pseudo dataset ###
+```{r}
+CT9.mean.1k = CT9.rand.1k$Random.mean
+CT9.pvalue.1k = CT9.rand.1k$P.value
+CT9.mu.1k = mean(CT9.mean.1k)
+CT9.avg_pvalue.1k = mean(CT9.pvalue.1k)
+df.CT9.rand.1k = data.frame(CT9.rand.1k)
+head(df.CT9.rand.1k)
+```
+
+### input breakpoints dataset ###
+```{r}
+real.ara.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-gene-1kw-1kd-20220413.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+```
+
+```{r}
+TE.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-TE-1kw-1kd-20220406.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+ORI.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-ORI-1kw-1kd-20220407.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT1.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT1-1kw-1kd-20220407.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT2.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT2-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT3.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT3-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT4.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT4-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT5.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT5-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT6.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT6-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT7.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT7-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT8.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT8-1kw-1kd-20220412.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT9.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT9-1kw-1kd-20220412.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+```
+
+### adjust parameters in real breakpoints dataset ###
+```{r}
+Enrich.1k = real.ara.1k$EnrichmentRatio
+realmean.1k = mean(Enrich.1k)
+realmin.1k = min(Enrich.1k)
+realmax.1k = max(Enrich.1k)
+```
+
+
+```{r}
+CT9.enrich.1k = CT9.real.1k$EnrichmentRatio
+CT9.realmean.1k = mean(CT9.enrich.1k)
+CT9.realmin.1k = min(CT9.enrich.1k)
+CT9.realmax.1k = max(CT9.enrich.1k)
+```
+
+## compare pseudo dataset and real breakpoints dataset ##
+```{r}
+enratio.1k = realmean.1k/mu.1k
+enratio.1k
+avg_pvalue.1k
+realmean.1k
+```
+
+```{r}
+CT9.enratio.1k = CT9.realmean.1k/CT9.mu.1k
+CT9.enratio.1k
+CT9.avg_pvalue.1k
+CT9.realmean.1k
+```
+
+# histogram with density plot with mean line #
+```{r}
+gene.den.meanline.1k <- ggplot(df.random.1k, aes(x=Mean.1k)) +
+  geom_histogram(colour="black", fill="black", bins = 120) +
+  geom_vline(aes(xintercept=realmean.1k, color="blue"), size=2, show.legend = FALSE) +
+  scale_x_continuous(name = "Mean gene density") +
+  scale_y_continuous(name = "Number of Breakpoints") +
+  labs(title = "Gene density in 1kb window") +
+  theme(axis.text = element_text(size = 10), axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+gene.den.meanline.1k
+```
+
+# draw text for p-value and ratio info #
+```{r}
+text1 <- paste("Enrichment Ratio = 0.41\nP-value = 1.08E-4***")
+text1.p <- ggparagraph(text = text1, color = "black", size = 8)
+```
+
+# add statistical info to plot #
+```{r}
+den.text.1k <- CT9.den.meanline.1k + annotation_custom(ggplotGrob(text1.p),xmin = 0.01, xmax = 0.2, ymax = 40)
+den.text.1k
+```
+
+
+# save 1k window plot #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/enrich/CT9-1kwindow-20220413.png", width = 5, height = 3)
+```
+
+
+
+## input 10kb window dataset ##
+### input psuedo dataset ###
+```{r}
+random.10k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_102-10k-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+```
+
+### adjust parameters in pseudo dataset ###
+```{r}
+Mean.10k = random.10k$Random.mean
+pvalue.10k = random.10k$P.value
+mu.10k = mean(Mean.10k)
+avg_pvalue.10k = mean(pvalue.10k)
+df.random.10k = data.frame(random.10k)
+head(df.random.10k)
+```
+
+### input breakpoints dataset ###
+```{r}
+real.ara.10k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/arabidopsis-10kwindow-10krandom-1kdataset-20211119.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+```
+
+### adjust parameters in real breakpoints dataset ###
+```{r}
+Enrich.10k = real.ara.10k$EnrichmentRatio
+realmean.10k = mean(Enrich.10k)
+realmin.10k = min(Enrich.10k)
+realmax.10k = max(Enrich.10k)
+```
+
+## compare pseudo dataset and real breakpoints dataset ##
+```{r}
+enratio.10k = realmean.10k/mu.10k
+enratio.10k
+avg_pvalue.10k
+realmean.10k
+```
+
+
+# histogram with density plot with mean line #
+```{r}
+den.meanline.10k <- ggplot(df.random.10k, aes(x=Mean.10k)) +
+  geom_histogram(colour="black", fill="black", bins = 120) +
+  geom_vline(aes(xintercept=realmean.10k, color="blue"), size=2, show.legend = FALSE) +
+  scale_x_continuous(name = "Mean Gene Density") +
+  scale_y_continuous(name = "Number of Breakpoints") +
+  labs(title = "Gene density in 10kb window") +
+  theme(axis.text = element_text(size = 10), axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+den.meanline.10k
+```
+
+# draw text for p-value and ratio info #
+```{r}
+text2 <- paste("Enrichment Ratio = 1.20\nP-value = 2.39E-25***")
+text2.p <- ggparagraph(text = text2, color = "black", size = 8)
+```
+
+# add statistical info to plot #
+```{r}
+den.text.10k <- den.meanline.10k + annotation_custom(ggplotGrob(text2.p),xmin = 0.55, xmax = 0.65, ymax = 112.5)
+den.text.10k
+```
+
+
+# save 10k window plot #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/10kwindow-20220126.png", width = 5, height = 3)
+```
+
+
+
+# arragne two plots on one page #
+```{r}
+onepage.enrich <- ggarrange(den.text.1k,den.text.10k,labels = c("F","G"), ncol = 2, nrow = 1, heights = 3, widths = 10)
+onepage.enrich
+```
+
+# save onepage plot #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/enrich-onepage-20220126.png", width = 10, height = 3)
+```
+
+
+
+
+
+
+
