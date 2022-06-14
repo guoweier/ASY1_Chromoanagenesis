@@ -1,0 +1,207 @@
+---
+title: "Arabidopsis_circos_plot_potential_junction_visualization"
+output:
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction #
+This is a Notebook to visualize potential junctions in asy1+/- Arabidopsis using circos plot. 
+The Circos plot is consisted of (from outer to inner):
+1. Arabidopsis genome scale
+2. Dosage plot
+3. links between potential junctions
+
+# input circos package #
+```{r}
+library(circlize)
+library(tidyverse)
+```
+
+
+# input data #
+## load arabidopsis chromosome sizes ##
+```{r}
+asy_chr <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/asy1-genome-size-20220125.txt", sep = "\t")
+asy_chr <- asy_chr[1:5,]
+asy_chr$start <- 0
+names(asy_chr) <- c("name","end","start")
+asy_chr
+```
+
+## input dosage plot ##
+```{r}
+asy_dos <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/dosage-100kb-20220125.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+asy_dos
+```
+
+
+## add chromosome columns with right format ##
+```{r}
+asy_df <- data.frame(chr = paste0("chr",1:5), start = rep(0,5), end = asy_chr$end)
+levels((asy_df$chr))
+asy_df$chr_test <- asy_df$chr
+asy_df$chr <- factor(asy_df$chr, levels = c("chr1", "chr2", "chr3","chr4", "chr5"))
+levels(asy_df$chr)
+asy_df
+```
+
+
+## potential junctions links data ##
+```{r}
+asy_link <- read_tsv("/Users/wendy/Desktop/Lab/arabidopsis/link_all_20220613.txt")
+
+asy.links <- asy_link %>%
+  mutate(Chrom1 = str_replace(string = `Left breakpoint`, pattern = "(.*)_(.*)", replacement = "\\1")) %>%
+  mutate(Chrom1 = str_replace(Chrom1, "C", "c")) %>%
+  mutate(Chrom1 = as.factor(Chrom1)) %>%
+  mutate(Pos1 = as.numeric(str_replace(string = `Left breakpoint`, pattern = "(.*)_(.*)", replacement = "\\2"))) %>%
+  mutate(Chrom2 = str_replace(string = `Right breakpoint`, pattern = "(.*)_(.*)", replacement = "\\1")) %>%
+  mutate(Chrom2 = str_replace(Chrom2, "C", "c")) %>%
+  mutate(Chrom2 = as.factor(Chrom2)) %>%
+  mutate(Pos2 = as.numeric(str_replace(string = `Right breakpoint`, pattern = "(.*)_(.*)", replacement = "\\2"))) %>%
+  select(Chrom1, Pos1, Chrom2, Pos2, Orientation, CNV_related)
+
+asy.links$CNV_color = NA
+asy.links$CNV_color[asy.links$CNV_related=="Two"] = "orange"
+asy.links$CNV_color[asy.links$CNV_related=="None"] = "gray" 
+
+asy.jun1 <- asy.links[c(1,2,7)]
+names(asy.jun1) <- c("chr","pos","color")
+asy.jun2 <- asy.links[c(3,4,7)]
+names(asy.jun2) <- c("chr","pos","color")
+asy.jun1
+asy.jun2
+```
+
+
+# generate circos plot #
+```{r}
+# generate circos plots #
+par(mar=c(1,1,1,1))
+png( '/Users/wendy/Desktop/Lab/arabidopsis/plots/circos-100k-20220613.png', width = 5, height = 5, units = 'in', res = 600)
+
+gap_degree=c(2,2,2,2,10)
+circos.par("clock.wise"=TRUE,start.degree=60,gap.degree=gap_degree,track.margin = c(0, 0), cell.padding=c(0, 0, 0, 0))
+circos.genomicInitialize(asy_df)
+
+# draw track for dosage plot #
+circos.genomicTrackPlotRegion(ylim=c(1,4),
+                              track.height = 0.1,
+                              bg.border = NA,
+                              panel.fun = function(region,value,...){
+                                gn = get.cell.meta.data("sector.index")
+                                dos = asy_dos[which(asy_dos$Chrom==gn),]
+                                dos$value = as.numeric(dos$Relative.Read.Coverage)
+                                for (i in 1:nrow(dos)){
+                                  circos.genomicPoints(region=dos[i,c("Strt","End")], value=dos[i,4],col="black", pch=16, cex=0.5)
+                                }
+                              }
+)
+
+# draw y-axis label for dosage plot #
+circos.yaxis(side = "left",sector.index = "chr1",labels.cex = 0.7,at=c(0,2,4),tick.length = convert_x(0.5,unit = "mm"))
+
+# add links for junctions #
+for (i in 1:nrow(asy.jun1)){
+  circos.link(asy.jun1[[i,1]],asy.jun1[[i,2]],asy.jun2[[i,1]],asy.jun2[[i,2]],col=asy.jun1[[i,3]],lwd=1)
+}
+
+
+dev.off()
+circos.clear()
+par(mar=c(5.1,4.1,4.1,2.1))
+```
+
+
+# generate circos plot on Chr1 #
+## input Chr1 dosage plot ##
+```{r}
+chr1_dos <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/dosage-5kb-chr1-20220125.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+chr1_dos
+```
+
+## add chr1 size ##
+```{r}
+asy_chr1 <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/asy1-genome-size-20220125.txt", sep = "\t")
+asy_chr1 <- asy_chr[1,]
+asy_chr1$start <- 0
+names(asy_chr1) <- c("name","end","start")
+asy_chr1
+```
+
+## add chromosome columns with right format ##
+```{r}
+chr1_df <- data.frame(chr = paste0("chr",1), start = rep(0,1), end = asy_chr1$end)
+chr1_df$chr_test <- chr1_df$chr
+chr1_df$chr <- factor(chr1_df$chr, levels = c("chr1"))
+chr1_df
+```
+
+## link data ##
+```{r}
+asy.links.chr1 <- asy.links %>%
+  filter(Chrom1 == "chr1") %>%
+  select(Chrom1, Pos1, Chrom2, Pos2, Orientation, CNV_related)
+
+asy.links.chr1$Ori_color = NA
+asy.links.chr1$Ori_color[asy.links.chr1$Orientation=="tail to head"] = "blue"
+asy.links.chr1$Ori_color[asy.links.chr1$Orientation=="head to head"] = "darkgreen"
+asy.links.chr1$Ori_color[asy.links.chr1$Orientation=="tail to tail"] = "pink"
+asy.links.chr1$Ori_color[asy.links.chr1$Orientation=="head to tail"] = "purple"
+asy.links.chr1
+
+asy.jun1.chr1 <- asy.links.chr1[c(1,2,7)]
+names(asy.jun1.chr1) <- c("chr","pos","color")
+asy.jun2.chr1 <- asy.links.chr1[c(3,4,7)]
+names(asy.jun2.chr1) <- c("chr","pos","color")
+asy.jun1.chr1
+asy.jun2.chr1
+```
+
+## generate circos plot for chr1 ##
+```{r}
+par(mar=c(1,1,1,1))
+png( '/Users/wendy/Desktop/Lab/arabidopsis/plots/circos-5k-chr1-20220613.png', width = 5, height = 5, units = 'in', res = 600)
+
+gap_degree=c(10)
+circos.par("clock.wise"=TRUE,start.degree=90,gap.degree=gap_degree,track.margin = c(0, 0), cell.padding=c(0, 0, 0, 0))
+circos.genomicInitialize(chr1_df)
+
+# draw track for dosage plot #
+circos.genomicTrackPlotRegion(ylim=c(1,5),
+                              track.height = 0.2,
+                              bg.border = NA,
+                              panel.fun = function(region,value,...){
+                                gn = get.cell.meta.data("sector.index")
+                                dos = chr1_dos[which(chr1_dos$Chrom==gn),]
+                                dos$value = as.numeric(dos$Relative.Read.Coverage)
+                                for (i in 1:nrow(dos)){
+                                  circos.genomicPoints(region=dos[i,c("Strt","End")], value=dos[i,4],col="black", alpha=0.5, pch=16, cex=0.4)
+                                }
+                              }
+)
+
+# draw y-axis label for dosage plot #
+circos.yaxis(side = "left",sector.index = "chr1",labels.cex = 0.7,at=c(0,2,4),tick.length = convert_x(0.5,unit = "mm"))
+
+# add links for junctions #
+for (i in 1:nrow(asy.jun1.chr1)){
+  circos.link(asy.jun1.chr1[[i,1]],asy.jun1.chr1[[i,2]],asy.jun2.chr1[[i,1]],asy.jun2.chr1[[i,2]],col=asy.jun1.chr1[[i,3]],lwd=1)
+}
+
+
+dev.off()
+circos.clear()
+par(mar=c(5.1,4.1,4.1,2.1))
+```
+
+
+
+
+

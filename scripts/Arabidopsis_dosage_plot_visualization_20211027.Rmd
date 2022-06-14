@@ -1,0 +1,139 @@
+---
+title: "Arabidopsis_dosage_plot_potential_junction_visualization"
+output:
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction #
+This is a Notebook for visualizing dosage plot on Arabidopsis sample Gaetan. 
+The input data is originally from bin-by-sam analysis. Details are as follow:
+1. Bin-by-sam.py (credit to Meric). 3 samples input into this python script: the chromoanagenesis sample, two controls from mixture of low coverage WT Arabidopsis (in order to have a similar sequence depth with the chromoanagenesis one). We tried different bin sizes, from 2.5kb to 100kb (2.5, 5, 10, 100). 
+2. Plot out relative reads coverage in JMP. By using JMP, we plot out the relative reads coverage for three individuals, and confirm CNVs at the beginning part of chromoanagenesis sample. 
+3. Modify the .txt file for visualization by ggplot. To have a clear plot for the review paper, we decide to remake the dosage plot using ggplot. Since control1 is using as the baseline in bin-by-sam, so the relative read coverage is all 2, so we delete that samples' information in the input file and only keep the chromoanagenesis sample and control2. 
+
+# Outlines #
+1. load libraries and data
+2. 
+
+# Input libraries and data #
+## add libraries ##
+```{r}
+library("tidyverse")
+library("ggplot2")
+library("ggpubr")
+```
+
+## add data ##
+```{r}
+arabidopsis.5k <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/dosage_plotting_input_5kb_chr1_20211108.txt",sep = "\t")
+head(arabidopsis.5k)
+```
+
+```{r}
+arabidopsis.100k <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/dosage_plotting_input_100kb_20211103.txt",sep = "\t")
+head(arabidopsis.100k)
+```
+
+```{r}
+arabidopsis.5k.12M <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/dosage_plotting_input_5kb_chr1_12M-20220114.txt",sep = "\t")
+head(arabidopsis.5k.12M)
+```
+
+
+# plot 100kb all chromosomes #
+```{r}
+all.100kb <- ggplot(arabidopsis.100k, aes(Strt,Relative.Read.Coverage,color=Sample)) +
+  geom_point(alpha=.6) +
+  scale_color_manual(values = c("#999999","#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") + 
+  scale_x_continuous(name="Genomic Position", breaks = NULL) +
+  scale_y_continuous(name="Relative read \ncoverage") +
+  facet_wrap(~Chrom, nrow = 1, scales = "free_x")
+all.100kb
+```
+
+# save the 100kb plot ##
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/Arabidopsis_dosage_100kb_20211103.png",width = 10, height = 2)
+```
+
+
+# plot 5kb chromosomes 1 #
+```{r}
+all.5kb <- ggplot(arabidopsis.5k, aes(Strt,as.numeric(Relative.Read.Coverage.5k),color=Sample)) +
+  geom_point(alpha=.6) +
+  scale_color_manual(values = c("#999999","#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") +
+  scale_x_continuous(name = "Chromosome 1", breaks = NULL) +
+  scale_y_continuous(name = "Relative Read \nCoverage",limits = c(1,4))
+all.5kb
+```
+
+# save the 5kb plot ##
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/Arabidopsis_dosage_5kb_chr1_20211108.png",width = 15, height = 2)
+```
+
+
+# plot 5kb chromosomes 1 0-1M #
+```{r}
+all.5kb.12M <- ggplot(arabidopsis.5k.12M, aes(Strt,as.numeric(Relative.Read.Coverage.5k),color=Sample)) +
+  geom_point(alpha=.6) +
+  scale_color_manual(values = c("#999999","#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)),legend.position = "bottom") +
+  scale_x_continuous(name = "Chromosome 1: 12Mb to 17Mb", breaks = NULL) +
+  scale_y_continuous(name = "Relative Read \nCoverage",limits = c(1,4))
+all.5kb.12M
+```
+
+## add potential junction data ##
+```{r}
+arabidopsis.anno <- read.csv('/Users/wendy/Desktop/Lab/arabidopsis/crossread-selected-2ctrl-500bp-annotate-20211027.txt', sep = '\t')
+head(arabidopsis.anno)
+```
+
+# change the order for breakpoint1 #
+```{r}
+arabidopsis.anno$Chrom1 <- factor(arabidopsis.anno$Chrom1,levels = c("Chr5","Chr4","Chr3","Chr2","Chr1"))
+```
+
+# Two dimentional plot #
+```{r}
+scatplot <- ggplot(arabidopsis.anno, aes(Chrom1_binstart,Chrom2_binstart,alpha=Size,size="1")) +
+  geom_point() +
+  scale_color_manual(values = c('#000000')) +
+  scale_alpha_manual(values = c(0,0.2)) +
+  scale_size_manual(values = c(1.5)) +
+  theme(legend.position = 'none', axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks = element_blank() ,axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14,margin = margin(r=10))) +
+  scale_x_continuous(name="Breakpoint1") +
+  scale_y_continuous(name="Breakpoint2") + 
+  facet_grid(rows = vars(arabidopsis.anno$Chrom1), cols = vars(arabidopsis.anno$Chrom2),scales = "free")
+scatplot
+```
+
+# save the scatter plot ##
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/Arabidopsis_potential_junctions_scatplot_20211103.png",height = 5, width = 5)
+```
+
+# arragne two plots on one page #
+```{r}
+onepage <- ggarrange(all.100kb,all.5kb,all.5kb.12M,labels = c("A","B","C"), ncol = 1, nrow = 3, widths = 10, heights = c(3,3,4))
+onepage
+```
+
+# save one page three plots #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/Arabidopsis_dosage_all_chr1_12M_20220114.png",width = 10)
+```
+
+
+
+
+
