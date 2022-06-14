@@ -1,0 +1,50 @@
+---
+title: "Generate-breakpoint-list"
+output:
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction #
+This is a Notebook modify the asy1 chromoanagenesis breakpoints.
+Input format: Chrom1_Position1    Chrom2_Position2
+Output format: Chrom1    Position1    Chrom2    Position2
+
+# Working process #
+## import library ##
+```{r}
+library(tidyverse)
+```
+
+## import data ##
+```{r}
+# load all breakpoints
+links <- read_tsv("../input/link_all_20220613.txt")
+# separate left and right breakpoints into Chrom and Pos
+links.edit <- links %>%
+  mutate(Chrom1 = str_replace(string = `Left breakpoint`, pattern = "(.*)_(.*)", replacement = "\\1")) %>%
+  mutate(Pos1 = as.numeric(str_replace(string = `Left breakpoint`, pattern = "(.*)_(.*)", replacement = "\\2"))) %>%
+  mutate(Chrom2 = str_replace(string = `Right breakpoint`, pattern = "(.*)_(.*)", replacement = "\\1")) %>%
+  mutate(Pos2 = as.numeric(str_replace(string = `Right breakpoint`, pattern = "(.*)_(.*)", replacement = "\\2"))) %>%
+  select(Chrom1, Pos1, Chrom2, Pos2)
+
+# create two files: one for left Chrom and Pos, the other for right Chrom and Pos
+links.jun1 <- links.edit %>%
+  select(Chrom1, Pos1)
+links.jun2 <- links.edit %>%
+  select(Chrom2, Pos2)
+
+links.all <- full_join(links.jun1, links.jun2, by = c("Pos1"="Pos2", "Chrom1"="Chrom2"))
+links.all
+```
+
+## output file ##
+```{r}
+write_tsv(links.all, "../input/breakpoints_20220614.txt")
+```
+
