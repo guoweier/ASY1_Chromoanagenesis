@@ -33,68 +33,68 @@ library("ggpubr")
 ## input 1kb window dataset ##
 ### input psuedo dataset ###
 ```{r}
-DHS.rand.1k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_DHS-Stats-20220414.txt",sep="\t", header = TRUE, stringsAsFactors = F)
-gene.rand.1k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_gene-Stats-20220414.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+DHS.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_DHS_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+gene.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_genes_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+mRNA.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_mRNA_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+pseudo.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_pseudogene_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+ori.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_replication_origins_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT1.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state1_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT2.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state2_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT3.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state3_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT4.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state4_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT5.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state5_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT6.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state6_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT7.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state7_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT8.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state8_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT9.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_state9_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+TE.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_transposable_element_1k_20220614-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
 ```
 
 ### adjust parameters in pseudo dataset ###
 ```{r}
-CT9.mean.1k = CT9.rand.1k$Random.mean
-CT9.pvalue.1k = CT9.rand.1k$P.value
-CT9.mu.1k = mean(CT9.mean.1k)
-CT9.avg_pvalue.1k = mean(CT9.pvalue.1k)
-df.CT9.rand.1k = data.frame(CT9.rand.1k)
-head(df.CT9.rand.1k)
+mean.1k = DHS.rand.1k$Random.mean
+pvalue.1k = DHS.rand.1k$P.value
+mu.1k = mean(mean.1k)
+avg_pvalue.1k = mean(pvalue.1k)
+df.rand.1k = data.frame(DHS.rand.1k)
+head(df.rand.1k)
 ```
 
 ### input breakpoints dataset ###
 ```{r}
-real.ara.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-gene-1kw-1kd-20220413.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-```
-
-```{r}
-TE.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-TE-1kw-1kd-20220406.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-ORI.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-ORI-1kw-1kd-20220407.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT1.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT1-1kw-1kd-20220407.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT2.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT2-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT3.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT3-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT4.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT4-1kw-1kd-20220408.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT5.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT5-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT6.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT6-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT7.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT7-1kw-1kd-20220411.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT8.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT8-1kw-1kd-20220412.txt", sep="\t", header = TRUE, stringsAsFactors = F)
-CT9.real.1k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Arabidopsis-CT9-1kw-1kd-20220412.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+DHS.real.1k = read.table("../enrich/input/Arabidopsis-DHS-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+gene.real.1k = read.table("../enrich/input/Arabidopsis-genes-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+mRNA.real.1k = read.table("../enrich/input/Arabidopsis-mRNA-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+pseudo.real.1k = read.table("../enrich/input/Arabidopsis-pseudogene-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+ori.real.1k = read.table("../enrich/input/Arabidopsis-replication_origins-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT1.real.1k = read.table("../enrich/input/Arabidopsis-state1-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT2.real.1k = read.table("../enrich/input/Arabidopsis-state2-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT3.real.1k = read.table("../enrich/input/Arabidopsis-state3-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT4.real.1k = read.table("../enrich/input/Arabidopsis-state4-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT5.real.1k = read.table("../enrich/input/Arabidopsis-state5-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT6.real.1k = read.table("../enrich/input/Arabidopsis-state6-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT7.real.1k = read.table("../enrich/input/Arabidopsis-state7-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT8.real.1k = read.table("../enrich/input/Arabidopsis-state8-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT9.real.1k = read.table("../enrich/input/Arabidopsis-state9-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+TE.real.1k = read.table("../enrich/input/Arabidopsis-transposable_element-1kw-1kd-20220614.txt", sep="\t", header = TRUE, stringsAsFactors = F)
 ```
 
 ### adjust parameters in real breakpoints dataset ###
-```{r}
-Enrich.1k = real.ara.1k$EnrichmentRatio
-realmean.1k = mean(Enrich.1k)
-realmin.1k = min(Enrich.1k)
-realmax.1k = max(Enrich.1k)
-```
-
 
 ```{r}
-CT9.enrich.1k = CT9.real.1k$EnrichmentRatio
-CT9.realmean.1k = mean(CT9.enrich.1k)
-CT9.realmin.1k = min(CT9.enrich.1k)
-CT9.realmax.1k = max(CT9.enrich.1k)
+enrich.1k = DHS.real.1k$EnrichmentRatio
+realmean.1k = mean(enrich.1k)
+realmin.1k = min(enrich.1k)
+realmax.1k = max(enrich.1k)
 ```
 
 ## compare pseudo dataset and real breakpoints dataset ##
+
 ```{r}
 enratio.1k = realmean.1k/mu.1k
 enratio.1k
 avg_pvalue.1k
 realmean.1k
-```
-
-```{r}
-CT9.enratio.1k = CT9.realmean.1k/CT9.mu.1k
-CT9.enratio.1k
-CT9.avg_pvalue.1k
-CT9.realmean.1k
 ```
 
 # histogram with density plot with mean line #
