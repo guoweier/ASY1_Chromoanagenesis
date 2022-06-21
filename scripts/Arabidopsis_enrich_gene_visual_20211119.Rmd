@@ -52,11 +52,11 @@ TE.rand.1k <- read.table("../enrich/input/Gaetan_aa_C_transposable_element_1k_20
 
 ### adjust parameters in pseudo dataset ###
 ```{r}
-mean.1k = DHS.rand.1k$Random.mean
-pvalue.1k = DHS.rand.1k$P.value
+mean.1k = ori.rand.1k$Random.mean
+pvalue.1k = ori.rand.1k$P.value
 mu.1k = mean(mean.1k)
 avg_pvalue.1k = mean(pvalue.1k)
-df.rand.1k = data.frame(DHS.rand.1k)
+df.rand.1k = data.frame(ori.rand.1k)
 head(df.rand.1k)
 ```
 
@@ -80,16 +80,14 @@ TE.real.1k = read.table("../enrich/input/Arabidopsis-transposable_element-1kw-1k
 ```
 
 ### adjust parameters in real breakpoints dataset ###
-
 ```{r}
-enrich.1k = DHS.real.1k$EnrichmentRatio
+enrich.1k = ori.real.1k$EnrichmentRatio
 realmean.1k = mean(enrich.1k)
 realmin.1k = min(enrich.1k)
 realmax.1k = max(enrich.1k)
 ```
 
 ## compare pseudo dataset and real breakpoints dataset ##
-
 ```{r}
 enratio.1k = realmean.1k/mu.1k
 enratio.1k
@@ -99,32 +97,32 @@ realmean.1k
 
 # histogram with density plot with mean line #
 ```{r}
-gene.den.meanline.1k <- ggplot(df.random.1k, aes(x=Mean.1k)) +
+meanline.1k <- ggplot(df.rand.1k, aes(x=mean.1k)) +
   geom_histogram(colour="black", fill="black", bins = 120) +
   geom_vline(aes(xintercept=realmean.1k, color="blue"), size=2, show.legend = FALSE) +
-  scale_x_continuous(name = "Mean gene density") +
+  scale_x_continuous(name = "Mean replication origin density") +
   scale_y_continuous(name = "Number of Breakpoints") +
-  labs(title = "Gene density in 1kb window") +
+  labs(title = "Replication origin density in 1kb window") +
   theme(axis.text = element_text(size = 10), axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
-gene.den.meanline.1k
+meanline.1k
 ```
 
 # draw text for p-value and ratio info #
 ```{r}
-text1 <- paste("Enrichment Ratio = 0.41\nP-value = 1.08E-4***")
+text1 <- paste("Enrichment Ratio = 1.50\nP-value = 0.047*")
 text1.p <- ggparagraph(text = text1, color = "black", size = 8)
 ```
 
 # add statistical info to plot #
 ```{r}
-den.text.1k <- CT9.den.meanline.1k + annotation_custom(ggplotGrob(text1.p),xmin = 0.01, xmax = 0.2, ymax = 40)
+den.text.1k <- meanline.1k + annotation_custom(ggplotGrob(text1.p),xmin = 0.05, xmax = 0.2, ymax = 45)
 den.text.1k
 ```
 
 
 # save 1k window plot #
 ```{r}
-ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/enrich/CT9-1kwindow-20220413.png", width = 5, height = 3)
+ggsave("../enrich/output/ORI-1kwindow-20220616.png", width = 5, height = 3)
 ```
 
 
@@ -132,30 +130,58 @@ ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/enrich/CT9-1kwindow-20220413.
 ## input 10kb window dataset ##
 ### input psuedo dataset ###
 ```{r}
-random.10k <- read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/Gaetan_aa_C_102-10k-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+DHS.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_DHS_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+gene.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_genes_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+mRNA.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_mRNA_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+pseudo.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_pseudogene_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+ori.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_replication_origins_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT1.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state1_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT2.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state2_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT3.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state3_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT4.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state4_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT5.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state5_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT6.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state6_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT7.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state7_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT8.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state8_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+CT9.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_state9_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
+TE.rand.10k <- read.table("../enrich/input/Gaetan_aa_C_transposable_element_10k_20220616-Stats.txt",sep="\t", header = TRUE, stringsAsFactors = F)
 ```
 
 ### adjust parameters in pseudo dataset ###
 ```{r}
-Mean.10k = random.10k$Random.mean
-pvalue.10k = random.10k$P.value
-mu.10k = mean(Mean.10k)
+mean.10k = TE.rand.10k$Random.mean
+pvalue.10k = TE.rand.10k$P.value
+mu.10k = mean(mean.10k)
 avg_pvalue.10k = mean(pvalue.10k)
-df.random.10k = data.frame(random.10k)
-head(df.random.10k)
+df.rand.10k = data.frame(TE.rand.10k)
+head(df.rand.10k)
 ```
 
 ### input breakpoints dataset ###
 ```{r}
-real.ara.10k = read.table("/Users/wendy/Desktop/Lab/arabidopsis/enrich_ratio/arabidopsis-10kwindow-10krandom-1kdataset-20211119.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+DHS.real.10k = read.table("../enrich/input/Arabidopsis-DHS-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+gene.real.10k = read.table("../enrich/input/Arabidopsis-genes-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+mRNA.real.10k = read.table("../enrich/input/Arabidopsis-mRNA-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+pseudo.real.10k = read.table("../enrich/input/Arabidopsis-pseudogene-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+ori.real.10k = read.table("../enrich/input/Arabidopsis-replication_origins-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT1.real.10k = read.table("../enrich/input/Arabidopsis-state1-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT2.real.10k = read.table("../enrich/input/Arabidopsis-state2-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT3.real.10k = read.table("../enrich/input/Arabidopsis-state3-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT4.real.10k = read.table("../enrich/input/Arabidopsis-state4-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT5.real.10k = read.table("../enrich/input/Arabidopsis-state5-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT6.real.10k = read.table("../enrich/input/Arabidopsis-state6-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT7.real.10k = read.table("../enrich/input/Arabidopsis-state7-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT8.real.10k = read.table("../enrich/input/Arabidopsis-state8-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+CT9.real.10k = read.table("../enrich/input/Arabidopsis-state9-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
+TE.real.10k = read.table("../enrich/input/Arabidopsis-transposable_element-10kw-1kd-20220616.txt", sep="\t", header = TRUE, stringsAsFactors = F)
 ```
 
 ### adjust parameters in real breakpoints dataset ###
 ```{r}
-Enrich.10k = real.ara.10k$EnrichmentRatio
-realmean.10k = mean(Enrich.10k)
-realmin.10k = min(Enrich.10k)
-realmax.10k = max(Enrich.10k)
+enrich.10k = TE.real.10k$EnrichmentRatio
+realmean.10k = mean(enrich.10k)
+realmin.10k = min(enrich.10k)
+realmax.10k = max(enrich.10k)
 ```
 
 ## compare pseudo dataset and real breakpoints dataset ##
@@ -166,53 +192,31 @@ avg_pvalue.10k
 realmean.10k
 ```
 
-
 # histogram with density plot with mean line #
 ```{r}
-den.meanline.10k <- ggplot(df.random.10k, aes(x=Mean.10k)) +
+meanline.10k <- ggplot(df.rand.10k, aes(x=mean.10k)) +
   geom_histogram(colour="black", fill="black", bins = 120) +
   geom_vline(aes(xintercept=realmean.10k, color="blue"), size=2, show.legend = FALSE) +
-  scale_x_continuous(name = "Mean Gene Density") +
+  scale_x_continuous(name = "Mean transposable element density") +
   scale_y_continuous(name = "Number of Breakpoints") +
-  labs(title = "Gene density in 10kb window") +
+  labs(title = "Transposable element density in 10kb window") +
   theme(axis.text = element_text(size = 10), axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
-den.meanline.10k
+meanline.10k
 ```
 
 # draw text for p-value and ratio info #
 ```{r}
-text2 <- paste("Enrichment Ratio = 1.20\nP-value = 2.39E-25***")
-text2.p <- ggparagraph(text = text2, color = "black", size = 8)
+text1 <- paste("Enrichment Ratio = 0.42\nP-value = 2.44E-53***")
+text1.p <- ggparagraph(text = text1, color = "black", size = 8)
 ```
 
 # add statistical info to plot #
 ```{r}
-den.text.10k <- den.meanline.10k + annotation_custom(ggplotGrob(text2.p),xmin = 0.55, xmax = 0.65, ymax = 112.5)
-den.text.10k
+den.text.1k <- meanline.10k + annotation_custom(ggplotGrob(text1.p),xmin = 0.12, xmax = 0.2, ymax = 125)
+den.text.1k
 ```
-
 
 # save 10k window plot #
 ```{r}
-ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/10kwindow-20220126.png", width = 5, height = 3)
+ggsave("../enrich/output/TE-10kwindow-20220616.png", width = 5, height = 3)
 ```
-
-
-
-# arragne two plots on one page #
-```{r}
-onepage.enrich <- ggarrange(den.text.1k,den.text.10k,labels = c("F","G"), ncol = 2, nrow = 1, heights = 3, widths = 10)
-onepage.enrich
-```
-
-# save onepage plot #
-```{r}
-ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/enrich-onepage-20220126.png", width = 10, height = 3)
-```
-
-
-
-
-
-
-

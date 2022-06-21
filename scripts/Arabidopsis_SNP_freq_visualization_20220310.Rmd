@@ -1,0 +1,166 @@
+---
+title: "Arabidopsis_SNP_freq_visualization"
+output:
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+# Introduction #
+The Notebook is aimed to visualize the SNP frequency (Col vs Ler) in asy1 shattered hybrids.
+The SNP% is for Ler. The SNP% would be different specifically around centromeres coming from different non-disjunctions.
+
+- If shattered chromosome from non-disjunction in Meiosis I:
+  with shattered arm: 33%; no shattered arm: 0% or 50%
+- if shattered chromosome from non-disjunction in Meiosis II:
+  with shattered arm: 66% or 0%; no shattered arm: 0% or 50%
+
+# Outline #
+1. load libraries and data
+2. 
+
+# Input libraries and data #
+## add libraries ##
+```{r}
+library("tidyverse")
+library("ggplot2")
+library("ggpubr")
+```
+
+
+## add data ##
+### 10kb ###
+```{r}
+asy1.SNP.10kb <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/binbygeno_asy1_10kb_20220310.txt",sep = "\t")
+head(asy1.SNP.10kb)
+```
+
+
+### 100kb ###
+```{r}
+asy1.SNP.100kb <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/binbygeno_asy1_100kb_20220310.txt",sep = "\t")
+head(asy1.SNP.100kb)
+```
+
+# take data in Chr1 #
+## 10kb ##
+```{r}
+pos.chr1.10kb <- asy1.SNP.10kb$Start[asy1.SNP.10kb$Chrom == 'Chr1']
+ler.chr1.10kb <- asy1.SNP.10kb$v.Gaetan.aa.C.102.Obs.B[asy1.SNP.10kb$Chrom == 'Chr1']
+chr1.10kb <- data.frame(pos.chr1.10kb,ler.chr1.10kb)
+snp.chr1.10kb <- list(pos.chr1.10kb)
+```
+
+# Chr1 #
+## 100kb ##
+```{r}
+pos.chr1.100kb <- asy1.SNP.100kb$Start[asy1.SNP.100kb$Chrom == 'Chr1']
+ler.chr1.100kb <- asy1.SNP.100kb$v.Gaetan.aa.C.102.Obs.B[asy1.SNP.100kb$Chrom == 'Chr1']
+chr1.100kb <- data.frame(pos.chr1.100kb, ler.chr1.100kb)
+```
+
+
+# SNP frequency plots #
+## 10kb ##
+```{r}
+snp.10kb <- ggplot(chr1.10kb, aes(pos.chr1.10kb,ler.chr1.10kb)) +
+  geom_point(alpha=.6) +
+  scale_color_manual(values = c("#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") + 
+  scale_x_continuous(name="Chromosome 1", breaks = NULL) +
+  scale_y_continuous(name="Ler SNP Frequency")
+snp.10kb
+```
+
+
+# save #
+## 10kb ##
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/asy1_snp_chr1_10kb_20220310.png",width = 10, height = 4)
+```
+
+# dosage data #
+## 5kb only chr1 ##
+```{r}
+asy1.dos.10k <- read.csv("/Users/wendy/Desktop/Lab/arabidopsis/binbysam-Gaetan-102-2ctrl-10kb-20210916.txt",sep = "\t")
+asy1.strt <- asy1.dos.10k$Strt[asy1.dos.10k$Chrom == 'Chr1']
+asy1.Cov <- asy1.dos.10k$Gaetan_aa_C_102.LC_C_1_21_ctrl[asy1.dos.10k$Chrom == 'Chr1']
+asy1.dos.Chr1 <- data.frame(asy1.strt, asy1.Cov)
+head(asy1.dos.Chr1)
+```
+## compare dos and snp locations ##
+```{r}
+dos.chr1.strt.new <- c()
+dos.chr1.cov.new <- c()
+for (a in asy1.dos.Chr1$asy1.strt) {
+  pos <- a-1
+  for (b in snp.chr1.10kb[[1]]) {
+    if (pos == b) {
+      dos.chr1.strt.new <- c(dos.chr1.strt.new, pos)
+      dos.chr1.cov.new <- c(dos.chr1.cov.new, asy1.dos.Chr1$asy1.Cov[asy1.strt == a])
+    }
+  }
+}
+length(dos.chr1.strt.new)
+length(dos.chr1.cov.new)
+length(snp.chr1.10kb[[1]])
+```
+
+## combine snp and dos with same positions ##
+```{r}
+dos.chr1.cov.new <- as.numeric(dos.chr1.cov.new)
+snp.dos.chr1.10k <- data.frame(dos.chr1.strt.new, dos.chr1.cov.new, ler.chr1.10kb)
+head(snp.dos.chr1.10k)
+```
+
+# save file #
+```{r}
+write.table(snp.dos.chr1.10k, file = "/Users/wendy/Desktop/Lab/arabidopsis/snp_dos_chr1_10kb_20220315.txt", sep = "\t", row.names = TRUE, col.names = TRUE)
+```
+
+
+# plot dos and snp together #
+```{r}
+dos.snp.10k <- ggplot(snp.dos.chr1.10k, aes(x = dos.chr1.strt.new)) +
+  geom_point(aes(y=dos.chr1.cov.new),alpha=.7,color="black") +
+  geom_point(aes(y=ler.chr1.10kb/25),alpha=.5,color="navy") +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10))) +
+  scale_x_continuous(name = "Chromosome 1", breaks = NULL) +
+  scale_y_continuous(name = "Relative Read Coverage",sec.axis = sec_axis(trans = ~.*25, name = "Ler SNP Frequency"))
+dos.snp.10k
+```
+
+# save plot #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/snp_dos_chr1_10kb_20220315.png", height = 4, width = 8)
+```
+
+
+# dosage plot #
+```{r}
+dos.10kb <- ggplot(asy1.dos.Chr1, aes(asy1.strt,as.numeric(asy1.Cov))) +
+  geom_point(alpha=.6) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") +
+  scale_x_continuous(name = "Chromosome 1", breaks = NULL) +
+  scale_y_continuous(name = "Relative Read \nCoverage",limits = c(1,4))
+dos.10kb
+```
+
+# arrange two plots into one #
+```{r}
+onepage <- ggarrange(snp.10kb,dos.10kb,labels = c("A","B"), ncol = 1, nrow = 2)
+onepage
+```
+
+# save onepage #
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/asy1_snp_dos_10kb_20220310.png", width = 5.5, height = 5)
+```
+
+
+
+
