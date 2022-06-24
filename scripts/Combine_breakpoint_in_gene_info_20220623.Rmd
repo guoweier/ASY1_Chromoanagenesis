@@ -1,0 +1,47 @@
+---
+title: "breakpoints_in_gene"
+author: "Weier Guo"
+date: "6/23/2022"
+output: html_document
+---
+
+## Introduction ##
+This Markdown aimed to add the genes information which have been broken down by Arabidopsis breakpoints into the whole breakpoints list. 
+
+## Working process ##
+
+### import library ###
+```{r}
+library(tidyverse)
+```
+
+### import data ###
+```{r}
+breakpoints <- read_tsv("../enrich/input/detect_bp_gene_20220623.txt")
+breakpoints <- breakpoints %>%
+  mutate(Chrom = str_replace(string = Breakpoints, pattern = "(.*)_(.*)", replacement = "\\1")) %>%
+  mutate(Pos = as.numeric(str_replace(string = Breakpoints, pattern = "(.*)_(.*)", replacement = "\\2"))) %>%
+  select(Chrom, Pos)
+breakpoints
+```
+
+```{r}
+bp.gene <- read_tsv("../enrich/output/breakpoints_in_genes_tair10_20220623.txt") 
+bp.gene
+```
+
+### combine two datasets ###
+```{r}
+all.bp.gene <- left_join(breakpoints, bp.gene, by=c("Chrom","Pos")) %>%
+  mutate(Description = str_replace(string = Info, pattern = "(.*)\\.(.*);(.*)", replacement = "\\1")) %>%
+  select(Chrom, Pos, Start, End, Description)
+all.bp.gene
+```
+
+
+### output file ###
+```{r}
+write_csv(all.bp.gene, "../enrich/output/breakpoints_gene_info_20220623.csv")
+```
+
+
