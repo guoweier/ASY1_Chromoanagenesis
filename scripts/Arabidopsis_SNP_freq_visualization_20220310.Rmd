@@ -68,11 +68,11 @@ chr1.100kb <- data.frame(pos.chr1.100kb, ler.chr1.100kb)
 ## 10kb ##
 ```{r}
 snp.10kb <- ggplot(chr1.10kb, aes(pos.chr1.10kb,ler.chr1.10kb)) +
-  geom_point(alpha=.6) +
+  geom_point(alpha=.5) +
   scale_color_manual(values = c("#E69F00")) +
-  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") + 
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") + 
   scale_x_continuous(name="Chromosome 1", breaks = NULL) +
-  scale_y_continuous(name="Ler SNP Frequency")
+  scale_y_continuous(name="Ler-1 allel Frequency")
 snp.10kb
 ```
 
@@ -80,7 +80,7 @@ snp.10kb
 # save #
 ## 10kb ##
 ```{r}
-ggsave("/Users/wendy/Desktop/Lab/arabidopsis/asy1_snp_chr1_10kb_20220310.png",width = 10, height = 4)
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_snp_chr1_10kb_20220629.png",width = 6, height = 2)
 ```
 
 # dosage data #
@@ -117,15 +117,81 @@ snp.dos.chr1.10k <- data.frame(dos.chr1.strt.new, dos.chr1.cov.new, ler.chr1.10k
 head(snp.dos.chr1.10k)
 ```
 
+# plot snp #
+```{r}
+snp.10kb <- ggplot(snp.dos.chr1.10k, aes(dos.chr1.strt.new,ler.chr1.10kb)) +
+  geom_point(alpha=.5) +
+  scale_color_manual(values = c("#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") + 
+  scale_x_continuous(name="Chromosome 1", breaks = NULL) +
+  scale_y_continuous(name="Ler-1 allel Frequency")
+snp.10kb
+```
+
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_snp_chr1_10kb_20220629.png",width = 6, height = 1.5)
+```
+
+
+# plot dosage #
+```{r}
+dos.10kb <- ggplot(snp.dos.chr1.10k, aes(dos.chr1.strt.new,dos.chr1.cov.new)) +
+  geom_point(alpha=.5,color = "navy") +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") +
+  scale_x_continuous(name = "", breaks = NULL) +
+  scale_y_continuous(name = "Relative read coverage",limits = c(1,4))
+dos.10kb
+```
+
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_dos_chr1_10kb_20220629.png",width = 6, height = 1.5)
+```
+
+
+```{r}
+snp.dos.chr1.10k.1217 <- snp.dos.chr1.10k %>%
+  filter(12000000 <= dos.chr1.strt.new & dos.chr1.strt.new <= 17000000)
+snp.dos.chr1.10k.1217
+```
+
 # save file #
 ```{r}
 write.table(snp.dos.chr1.10k, file = "/Users/wendy/Desktop/Lab/arabidopsis/snp_dos_chr1_10kb_20220315.txt", sep = "\t", row.names = TRUE, col.names = TRUE)
 ```
 
+# plot snp #
+```{r}
+snp.10kb <- ggplot(snp.dos.chr1.10k.1217, aes(dos.chr1.strt.new,ler.chr1.10kb)) +
+  geom_point(alpha=.5) +
+  scale_color_manual(values = c("#E69F00")) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") + 
+  scale_x_continuous(name="Chromosome 1: 10Mb to 16Mb", breaks = NULL) +
+  scale_y_continuous(name="Ler-1 allel Frequency")
+snp.10kb
+```
+
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_snp_chr1_1217_20220629.png",width = 6, height = 1.5)
+```
+
+# plot dosage #
+```{r}
+dos.10kb <- ggplot(snp.dos.chr1.10k.1217, aes(dos.chr1.strt.new,dos.chr1.cov.new)) +
+  geom_point(alpha=.5,color = "navy") +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") +
+  scale_x_continuous(name = "", breaks = NULL) +
+  scale_y_continuous(name = "Relative read coverage",limits = c(1,4))
+dos.10kb
+```
+
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_dos_chr1_1217_20220629.png",width = 6, height = 1.5)
+```
+
 
 # plot dos and snp together #
 ```{r}
-dos.snp.10k <- ggplot(snp.dos.chr1.10k, aes(x = dos.chr1.strt.new)) +
+dos.snp.10k <- ggplot(snp.dos.chr1.10k.1217, aes(x = dos.chr1.strt.new)) +
   geom_point(aes(y=dos.chr1.cov.new),alpha=.6,color="orange") +
   geom_point(aes(y=ler.chr1.10kb/25),alpha=.5,color="navy") +
   theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10))) +
@@ -143,16 +209,20 @@ ggsave("/Users/wendy/Desktop/manuscript-ASY1/snp_dos_chr1_10kb_20220622.png", he
 # dosage plot #
 ```{r}
 dos.10kb <- ggplot(asy1.dos.Chr1, aes(asy1.strt,as.numeric(asy1.Cov))) +
-  geom_point(alpha=.6,color="orange") +
-  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 14, margin = margin(t=10)), axis.title.y = element_text(size = 14, margin = margin(r=10)), legend.position = "None") +
-  scale_x_continuous(name = "Chromosome 1", breaks = NULL) +
-  scale_y_continuous(name = "Relative Read \nCoverage",limits = c(1,4))
+  geom_point(alpha=.5) +
+  theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") +
+  scale_x_continuous(name = "", breaks = NULL) +
+  scale_y_continuous(name = "Relative read coverage",limits = c(1,4))
 dos.10kb
+```
+
+```{r}
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/dosage-chr1-20220629.png", width = 6, height = 1.5)
 ```
 
 # arrange two plots into one #
 ```{r}
-onepage <- ggarrange(snp.10kb, ncol = 1, nrow = 1)
+onepage <- ggarrange(dos.10kb, snp.10kb, ncol = 1, nrow = 2)
 onepage
 ```
 
