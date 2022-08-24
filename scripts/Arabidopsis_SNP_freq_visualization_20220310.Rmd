@@ -150,7 +150,7 @@ ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_dos_chr1_10kb_20220629.p
 
 ```{r}
 snp.dos.chr1.10k.1217 <- snp.dos.chr1.10k %>%
-  filter(12000000 <= dos.chr1.strt.new & dos.chr1.strt.new <= 17000000)
+  filter(13000000 <= dos.chr1.strt.new & dos.chr1.strt.new <= 18000000)
 snp.dos.chr1.10k.1217
 ```
 
@@ -165,13 +165,13 @@ snp.10kb <- ggplot(snp.dos.chr1.10k.1217, aes(dos.chr1.strt.new,ler.chr1.10kb)) 
   geom_point(alpha=.5) +
   scale_color_manual(values = c("#E69F00")) +
   theme(axis.text.x = element_text(size = 8, angle = 90), axis.title.x = element_text(size = 10, margin = margin(t=10)), axis.title.y = element_text(size = 8, margin = margin(r=10)), legend.position = "None") + 
-  scale_x_continuous(name="Chromosome 1: 10Mb to 16Mb", breaks = NULL) +
+  scale_x_continuous(name="Chromosome 1: 13Mb to 18Mb", breaks = NULL) +
   scale_y_continuous(name="Ler-1 allel Frequency")
 snp.10kb
 ```
 
 ```{r}
-ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_snp_chr1_1217_20220629.png",width = 6, height = 1.5)
+ggsave("/Users/wendy/Desktop/Lab/arabidopsis/plots/asy1_snp_chr1_1217_20220629.png",width = 5, height = 1.5)
 ```
 
 # plot dosage #
